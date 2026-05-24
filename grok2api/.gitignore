@@ -37,6 +37,8 @@ env/
 
 # Environment Variables
 .env
+.env.local
+.env.*.local
 
 # Logs
 logs/
@@ -52,4 +54,4 @@ app/data/
 htmlcov/
 
 # Project specific
-.ace-tool/
+config.local.toml
