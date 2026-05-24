@@ -21,21 +21,47 @@ echo "  Dir : $INSTALL_DIR"
 echo "=============================="
 
 # --- Kill existing process on port 8885 ---
-echo "[1/3] Checking port $PORT..."
-OLD_PID=$(lsof -ti tcp:$PORT 2>/dev/null || true)
-if [ -n "$OLD_PID" ]; then
-    echo "  Killing old process (PID: $OLD_PID)..."
-    kill -9 $OLD_PID 2>/dev/null || true
-    sleep 1
+echo "[1/3] Killing any process on port $PORT..."
+
+# Method 1: fuser (most reliable, available everywhere)
+if command -v fuser &>/dev/null; then
+    fuser -k ${PORT}/tcp 2>/dev/null && echo "  Killed via fuser" || true
+
+# Method 2: ss + awk + kill
+elif command -v ss &>/dev/null; then
+    PIDS=$(ss -tlnp "sport = :${PORT}" 2>/dev/null | grep -oP 'pid=\K[0-9]+')
+    for pid in $PIDS; do
+        kill -9 "$pid" 2>/dev/null && echo "  Killed PID $pid" || true
+    done
+
+# Method 3: lsof
+elif command -v lsof &>/dev/null; then
+    OLD_PIDS=$(lsof -ti tcp:$PORT 2>/dev/null || true)
+    for pid in $OLD_PIDS; do
+        kill -9 "$pid" 2>/dev/null && echo "  Killed PID $pid" || true
+    done
+
+# Method 4: /proc scan
+else
+    for pid in $(ls /proc | grep -E '^[0-9]+$'); do
+        if [ -f "/proc/$pid/net/tcp" ]; then
+            HEX_PORT=$(printf '%04X' $PORT)
+            if grep -q ":${HEX_PORT}" /proc/$pid/net/tcp6 2>/dev/null || \
+               grep -q ":${HEX_PORT}" /proc/$pid/net/tcp 2>/dev/null; then
+                kill -9 "$pid" 2>/dev/null && echo "  Killed PID $pid" || true
+            fi
+        fi
+    done
 fi
 
 # Also kill by PID file
 if [ -f "$PID_FILE" ]; then
-    OLD_PID2=$(cat "$PID_FILE")
-    kill -9 "$OLD_PID2" 2>/dev/null || true
+    OLD_PID=$(cat "$PID_FILE")
+    kill -9 "$OLD_PID" 2>/dev/null && echo "  Killed old PID $OLD_PID from pidfile" || true
     rm -f "$PID_FILE"
 fi
 
+sleep 2
 echo "  Port $PORT is free."
 
 # --- Check uv ---
@@ -61,7 +87,7 @@ nohup uv run uvicorn main:app \
 NEW_PID=$!
 echo $NEW_PID > "$PID_FILE"
 
-sleep 2
+sleep 3
 
 # --- Verify ---
 if kill -0 $NEW_PID 2>/dev/null; then
