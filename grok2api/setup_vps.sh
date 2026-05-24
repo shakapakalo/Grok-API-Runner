@@ -56,8 +56,16 @@ EOF
 systemctl daemon-reload
 systemctl enable ${SERVICE_NAME}
 
-# 4. Start service
-echo "[4/4] Starting Grok2API on port $PORT..."
+# 4. Setup cron — auto delete video/image every 10 minutes
+echo "[4/5] Setting up auto-cleanup cron (every 10 min)..."
+chmod +x "$INSTALL_DIR/cleanup.sh"
+CRON_JOB="*/10 * * * * bash $INSTALL_DIR/cleanup.sh"
+# Add only if not already present
+( crontab -l 2>/dev/null | grep -v "cleanup.sh" ; echo "$CRON_JOB" ) | crontab -
+echo "  Cron set: $CRON_JOB"
+
+# 5. Start service
+echo "[5/5] Starting Grok2API on port $PORT..."
 systemctl restart ${SERVICE_NAME}
 sleep 2
 systemctl status ${SERVICE_NAME} --no-pager
@@ -69,4 +77,5 @@ echo "  Commands:"
 echo "    systemctl status grok2api"
 echo "    systemctl restart grok2api"
 echo "    journalctl -u grok2api -f"
+echo "    tail -f $INSTALL_DIR/logs/cleanup.log"
 echo "=============================="

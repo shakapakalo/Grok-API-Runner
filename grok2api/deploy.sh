@@ -64,6 +64,14 @@ fi
 sleep 2
 echo "  Port $PORT is free."
 
+# --- Setup cleanup cron if not already set ---
+chmod +x "$INSTALL_DIR/cleanup.sh" 2>/dev/null || true
+CRON_JOB="*/10 * * * * bash $INSTALL_DIR/cleanup.sh"
+if ! crontab -l 2>/dev/null | grep -q "cleanup.sh"; then
+    ( crontab -l 2>/dev/null; echo "$CRON_JOB" ) | crontab -
+    echo "  Auto-cleanup cron added (every 10 min)"
+fi
+
 # --- Check uv ---
 export PATH="$HOME/.local/bin:$PATH"
 if ! command -v uv &>/dev/null; then
