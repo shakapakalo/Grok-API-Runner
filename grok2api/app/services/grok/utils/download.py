@@ -24,6 +24,44 @@ from app.services.reverse.utils.session import ResettableSession
 from app.services.grok.utils.locks import _get_download_semaphore, _file_lock
 
 
+def _remove_grok_watermark_video(raw: bytes) -> bytes:
+    """Remove the Grok logo watermark from the bottom-right corner of a video using ffmpeg delogo filter."""
+    import subprocess, tempfile, os
+    tmp_in_path = ""
+    tmp_out_path = ""
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp_in:
+            tmp_in.write(raw)
+            tmp_in_path = tmp_in.name
+        tmp_out_path = tmp_in_path.replace(".mp4", "_clean.mp4")
+        result = subprocess.run(
+            [
+                "ffmpeg", "-y", "-i", tmp_in_path,
+                "-vf", "delogo=x=W-155:y=H-50:w=155:h=50:show=0",
+                "-c:v", "libx264", "-crf", "18", "-preset", "fast",
+                "-c:a", "copy",
+                tmp_out_path,
+            ],
+            capture_output=True,
+            timeout=300,
+        )
+        if result.returncode == 0 and os.path.exists(tmp_out_path):
+            with open(tmp_out_path, "rb") as f:
+                return f.read()
+        logger.warning("video watermark removal ffmpeg failed: {}", result.stderr[-300:].decode(errors="replace"))
+        return raw
+    except Exception as exc:
+        logger.warning("video watermark removal failed, returning original: {}", exc)
+        return raw
+    finally:
+        for p in (tmp_in_path, tmp_out_path):
+            try:
+                if p:
+                    os.unlink(p)
+            except Exception:
+                pass
+
+
 def _remove_grok_watermark(raw: bytes, mime: str) -> bytes:
     """Remove the Grok logo watermark from the bottom-right corner of the image."""
     try:
