@@ -86,6 +86,7 @@ def resolve_aspect_ratio(size: str) -> str:
 class _ImageOutput:
     api_value:      str
     markdown_value: str
+    cdn_url:        str = ""
 
 
 def _clamp_progress(value: int) -> int:
@@ -280,7 +281,7 @@ async def _resolve_image_output(
         _extract_image_file_id(url),
     )
     local_url = _local_image_url(file_id)
-    return _ImageOutput(api_value=local_url, markdown_value=f"![image]({local_url})")
+    return _ImageOutput(api_value=local_url, markdown_value=f"![image]({local_url})", cdn_url=url)
 
 
 def _output_content(image: _ImageOutput, *, chat_format: bool) -> str:
@@ -500,10 +501,11 @@ async def generate(
             reasoning_content=reasoning,
         )
 
+    fmt_norm = _normalize_response_format(response_format)
     data = [
         {"b64_json": image.api_value}
-        if _normalize_response_format(response_format) == "b64_json"
-        else {"url": image.api_value}
+        if fmt_norm == "b64_json"
+        else {k: v for k, v in {"url": image.api_value, "cdn_url": image.cdn_url or None}.items() if v is not None}
         for image in finals
     ]
     return {"created": int(time.time()), "data": data}
@@ -617,12 +619,13 @@ async def _generate_lite(
             reasoning_content=reasoning,
         )
 
+    fmt_norm = _normalize_response_format(response_format)
     return {
         "created": int(time.time()),
         "data": [
             {"b64_json": image.api_value}
-            if _normalize_response_format(response_format) == "b64_json"
-            else {"url": image.api_value}
+            if fmt_norm == "b64_json"
+            else {k: v for k, v in {"url": image.api_value, "cdn_url": image.cdn_url or None}.items() if v is not None}
             for image in images
         ],
     }
@@ -1317,10 +1320,11 @@ async def edit(
             reasoning_content=reasoning,
         )
 
+    fmt_norm = _normalize_response_format(response_format)
     data_list = [
         {"b64_json": image.api_value}
-        if _normalize_response_format(response_format) == "b64_json"
-        else {"url": image.api_value}
+        if fmt_norm == "b64_json"
+        else {k: v for k, v in {"url": image.api_value, "cdn_url": image.cdn_url or None}.items() if v is not None}
         for image in images
     ]
     return {"created": int(time.time()), "data": data_list}
