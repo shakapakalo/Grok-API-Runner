@@ -9,8 +9,8 @@ INSTALL_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_FILE="$INSTALL_DIR/data/config.toml"
 PORT=8885
 
-# Auto-detect VPS public IP
-VPS_IP=$(curl -s ifconfig.me 2>/dev/null || curl -s api.ipify.org 2>/dev/null || echo "")
+# Auto-detect VPS public IP — force IPv4 with -4 flag
+VPS_IP=$(curl -4 -s ifconfig.me 2>/dev/null || curl -4 -s api.ipify.org 2>/dev/null || curl -4 -s icanhazip.com 2>/dev/null || echo "")
 
 echo "=============================="
 echo "  Grok2API VPS Config"

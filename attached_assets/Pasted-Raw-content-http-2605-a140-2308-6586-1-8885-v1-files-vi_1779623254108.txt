@@ -1,0 +1,46 @@
+Raw content: http://2605:a140:2308:6586::1:8885/v1/files/video/users/a524d3de-92f6-4f44-aaa7-218a8ad1fa4d/generated/58c7f0fa-dd06-44eb-b186-3c8938b5dc6b/generated_video.mp4
+
+Video URL: http://2605:a140:2308:6586::1:8885/v1/files/video/users/a524d3de-92f6-4f44-aaa7-218a8ad1fa4d/generated/58c7f0fa-dd06-44eb-b186-3c8938b5dc6b/generated_video.mp4
+Traceback (most recent call last):
+  File "C:\Users\HomePC\AppData\Roaming\Python\Python314\site-packages\requests\models.py", line 433, in prepare_url
+    scheme, auth, host, port, path, query, fragment = parse_url(url)
+                                                      ~~~~~~~~~^^^^^
+  File "C:\Users\HomePC\AppData\Roaming\Python\Python314\site-packages\urllib3\util\url.py", line 397, in parse_url
+    return six.raise_from(LocationParseError(source_url), None)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 3, in raise_from
+urllib3.exceptions.LocationParseError: Failed to parse: http://2605:a140:2308:6586::1:8885/v1/files/video/users/a524d3de-92f6-4f44-aaa7-218a8ad1fa4d/generated/58c7f0fa-dd06-44eb-b186-3c8938b5dc6b/generated_video.mp4
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "d:\Downloads\gtp test.py", line 55, in <module>
+    text_to_video("a cat playing piano in a jazz club", "cat_piano.mp4")
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "d:\Downloads\gtp test.py", line 47, in text_to_video
+    vid = requests.get(video_url, timeout=120)
+  File "C:\Users\HomePC\AppData\Roaming\Python\Python314\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\HomePC\AppData\Roaming\Python\Python314\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HomePC\AppData\Roaming\Python\Python314\site-packages\requests\sessions.py", line 575, in request
+    prep = self.prepare_request(req)
+  File "C:\Users\HomePC\AppData\Roaming\Python\Python314\site-packages\requests\sessions.py", line 484, in prepare_request
+    p.prepare(
+    ~~~~~~~~~^
+        method=request.method.upper(),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        hooks=merge_hooks(request.hooks, self.hooks),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\HomePC\AppData\Roaming\Python\Python314\site-packages\requests\models.py", line 367, in prepare
+    self.prepare_url(url, params)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\HomePC\AppData\Roaming\Python\Python314\site-packages\requests\models.py", line 435, in prepare_url
+    raise InvalidURL(*e.args)
+requests.exceptions.InvalidURL: Failed to parse: http://2605:a140:2308:6586::1:8885/v1/files/video/users/a524d3de-92f6-4f44-aaa7-218a8ad1fa4d/generated/58c7f0fa-dd06-44eb-b186-3c8938b5dc6b/generated_video.mp4
+
+[Done] exited with code=1 in 26.474 seconds
