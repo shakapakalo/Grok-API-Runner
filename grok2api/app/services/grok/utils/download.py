@@ -24,6 +24,25 @@ from app.services.reverse.utils.session import ResettableSession
 from app.services.grok.utils.locks import _get_download_semaphore, _file_lock
 
 
+def _get_video_dimensions(path: str):
+    """Return (width, height) of a video file using ffprobe."""
+    import subprocess
+    result = subprocess.run(
+        [
+            "ffprobe", "-v", "error",
+            "-select_streams", "v:0",
+            "-show_entries", "stream=width,height",
+            "-of", "csv=p=0", path,
+        ],
+        capture_output=True, timeout=30,
+    )
+    if result.returncode == 0:
+        parts = result.stdout.decode().strip().split(",")
+        if len(parts) == 2:
+            return int(parts[0]), int(parts[1])
+    return None, None
+
+
 def _remove_grok_watermark_video(raw: bytes) -> bytes:
     """Remove the Grok logo watermark from the bottom-right corner of a video using ffmpeg delogo filter."""
     import subprocess, tempfile, os
@@ -34,10 +53,28 @@ def _remove_grok_watermark_video(raw: bytes) -> bytes:
             tmp_in.write(raw)
             tmp_in_path = tmp_in.name
         tmp_out_path = tmp_in_path.replace(".mp4", "_clean.mp4")
+
+        # Get actual dimensions — ffmpeg 6.x delogo doesn't support W/H vars
+        w, h = _get_video_dimensions(tmp_in_path)
+        if not w or not h:
+            return raw
+
+        wm_w = max(130, int(w * 0.13))
+        wm_h = max(38,  int(h * 0.06))
+        x = w - wm_w
+        y = h - wm_h
+
+        # Fill watermark zone with pixels from just above it (same as image approach)
+        above_y = max(0, y - wm_h)
+        vf = (
+            f"[0:v]split=2[base][ref];"
+            f"[ref]crop={wm_w}:{wm_h}:{x}:{above_y}[fill];"
+            f"[base][fill]overlay={x}:{y}"
+        )
         result = subprocess.run(
             [
                 "ffmpeg", "-y", "-i", tmp_in_path,
-                "-vf", "delogo=x=W-155:y=H-50:w=155:h=50:show=0",
+                "-filter_complex", vf,
                 "-c:v", "libx264", "-crf", "18", "-preset", "fast",
                 "-c:a", "copy",
                 tmp_out_path,
