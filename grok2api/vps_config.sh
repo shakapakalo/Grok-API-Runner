@@ -52,6 +52,35 @@ filter_tags = ["xaiartifact","xai:tool_usage_card","grok:render"]
 base_proxy_url = ""
 asset_proxy_url = ""
 enabled = false
+
+[retry]
+max_retry = 3
+retry_status_codes = [401,429,403]
+retry_backoff_base = 0.5
+retry_backoff_factor = 2.0
+retry_backoff_max = 20.0
+retry_budget = 60.0
+
+[chat]
+concurrent = 50
+timeout = 300
+stream_timeout = 300
+
+[image]
+timeout = 60
+stream_timeout = 60
+final_timeout = 15
+nsfw = true
+
+[video]
+concurrent = 100
+timeout = 600
+stream_timeout = 300
+
+[asset]
+upload_timeout = 60
+download_timeout = 60
+delete_timeout = 60
 EOF
     echo "  config.toml created."
 fi
