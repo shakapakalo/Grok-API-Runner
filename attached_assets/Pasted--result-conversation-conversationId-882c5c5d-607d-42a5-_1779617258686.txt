@@ -1,0 +1,266 @@
+{
+    "result": {
+        "conversation": {
+            "conversationId": "882c5c5d-607d-42a5-84b9-2addd9678236",
+            "title": "New conversation",
+            "starred": false,
+            "createTime": "2026-05-24T10:05:12.174483Z",
+            "modifyTime": "2026-05-24T10:05:12.175079Z",
+            "systemPromptName": "",
+            "temporary": true,
+            "mediaTypes": [],
+            "workspaces": [],
+            "taskResult": null
+        }
+    }
+}{
+    "result": {
+        "response": {
+            "userResponse": {
+                "responseId": "37052e19-6f76-4216-8985-e0de977df456",
+                "message": "big cat",
+                "sender": "human",
+                "createTime": "2026-05-24T10:05:12.208Z",
+                "manual": false,
+                "partial": false,
+                "shared": false,
+                "query": "",
+                "queryType": "",
+                "webSearchResults": [],
+                "xpostIds": [],
+                "xposts": [],
+                "generatedImageUrls": [],
+                "imageAttachments": [],
+                "fileAttachments": [
+                    "d6beee6f-a399-4486-a7af-e11fe5a3b040"
+                ],
+                "cardAttachmentsJson": [],
+                "fileUris": [],
+                "fileAttachmentsMetadata": [],
+                "isControl": false,
+                "steps": [],
+                "imageEditUris": [],
+                "mediaTypes": [],
+                "webpageUrls": [],
+                "metadata": {
+                    "modelConfigOverride": {
+                        "modelMap": {
+                            "imageEditModel": "imagine",
+                            "imageEditModelConfig": {
+                                "appliedModerationRule": "MODERATION_RULE_UPLOADED",
+                                "imageReferences": [
+                                    "https://assets.grok.com/users/a524d3de-92f6-4f44-aaa7-218a8ad1fa4d/d6beee6f-a399-4486-a7af-e11fe5a3b040/content"
+                                ],
+                                "isRootCelebrity": false,
+                                "isRootUserUploaded": true,
+                                "parentPostId": "d6beee6f-a399-4486-a7af-e11fe5a3b040",
+                                "resolvedImageReferences": [
+                                    "https://assets.grok.com/users/a524d3de-92f6-4f44-aaa7-218a8ad1fa4d/d6beee6f-a399-4486-a7af-e11fe5a3b040/content"
+                                ],
+                                "rootPostId": "d6beee6f-a399-4486-a7af-e11fe5a3b040"
+                            }
+                        }
+                    }
+                },
+                "citedWebSearchResults": [],
+                "toolResponses": [],
+                "model": "imagine-image-edit",
+                "ragResults": [],
+                "citedRagResults": [],
+                "searchProductResults": [],
+                "connectorSearchResults": [],
+                "collectionSearchResults": [],
+                "streamErrors": [],
+                "citedXposts": [],
+                "citedConnectorSearchResults": [],
+                "citedCollectionSearchResults": [],
+                "chunks": []
+            },
+            "isThinking": false,
+            "isSoftStop": false,
+            "responseId": "37052e19-6f76-4216-8985-e0de977df456"
+        }
+    }
+}{
+    "result": {
+        "response": {
+            "progressReport": {
+                "category": "PROGRESS_REPORT_CATEGORY_ATTACHMENTS_PREPROCESSING",
+                "state": "PROGRESS_REPORT_STATUS_PENDING",
+                "message": "Started pre-processing attachments"
+            },
+            "isThinking": false,
+            "isSoftStop": false,
+            "responseId": "4293afac-bb4d-4aa1-af8e-706991de54d9"
+        }
+    }
+}{
+    "result": {
+        "response": {
+            "progressReport": {
+                "category": "PROGRESS_REPORT_CATEGORY_ATTACHMENTS_PREPROCESSING",
+                "state": "PROGRESS_REPORT_STATUS_SUCCESS",
+                "message": "Finished pre-processing attachments"
+            },
+            "isThinking": false,
+            "isSoftStop": false,
+            "responseId": "4293afac-bb4d-4aa1-af8e-706991de54d9"
+        }
+    }
+}{
+    "result": {
+        "response": {
+            "queryAction": {
+                "query": "",
+                "type": "imagine"
+            },
+            "isThinking": false,
+            "isSoftStop": false,
+            "responseId": "4293afac-bb4d-4aa1-af8e-706991de54d9"
+        }
+    }
+}{
+    "result": {
+        "response": {
+            "imageAttachmentInfo": {
+                "imageAttachmentCount": 1
+            },
+            "isThinking": false,
+            "isSoftStop": false,
+            "responseId": "4293afac-bb4d-4aa1-af8e-706991de54d9"
+        }
+    }
+}{
+    "result": {
+        "response": {
+            "imageDimensions": {
+                "width": 768,
+                "height": 1360
+            },
+            "isThinking": false,
+            "isSoftStop": false,
+            "responseId": "4293afac-bb4d-4aa1-af8e-706991de54d9"
+        }
+    }
+}{
+    "result": {
+        "response": {
+            "streamingImageGenerationResponse": {
+                "imageId": "9ca7f9fe-cf08-456b-a9a6-8115d9a13ad2",
+                "imageUrl": "users/a524d3de-92f6-4f44-aaa7-218a8ad1fa4d/generated/9ca7f9fe-cf08-456b-a9a6-8115d9a13ad2-part-0/image.jpg",
+                "seq": 0,
+                "progress": 50,
+                "imageIndex": 0,
+                "imageModel": "imagine-image-edit"
+            },
+            "isThinking": false,
+            "isSoftStop": false,
+            "responseId": "4293afac-bb4d-4aa1-af8e-706991de54d9"
+        }
+    }
+}{
+    "result": {
+        "response": {
+            "streamingImageGenerationResponse": {
+                "imageId": "9ca7f9fe-cf08-456b-a9a6-8115d9a13ad2",
+                "imageUrl": "users/a524d3de-92f6-4f44-aaa7-218a8ad1fa4d/generated/9ca7f9fe-cf08-456b-a9a6-8115d9a13ad2/image.jpg",
+                "progress": 100,
+                "moderated": false,
+                "imageIndex": 0,
+                "assetId": "9ca7f9fe-cf08-456b-a9a6-8115d9a13ad2",
+                "imageModel": "imagine-image-edit",
+                "rRated": false,
+                "isRootUserUploaded": true
+            },
+            "isThinking": false,
+            "isSoftStop": false,
+            "responseId": "4293afac-bb4d-4aa1-af8e-706991de54d9"
+        }
+    }
+}{
+    "result": {
+        "response": {
+            "token": "I edited the image with the prompt: 'big cat'",
+            "isThinking": false,
+            "isSoftStop": true,
+            "responseId": "4293afac-bb4d-4aa1-af8e-706991de54d9"
+        }
+    }
+}{
+    "result": {
+        "response": {
+            "modelResponse": {
+                "responseId": "4293afac-bb4d-4aa1-af8e-706991de54d9",
+                "message": "I edited the image with the prompt: 'big cat'",
+                "sender": "ASSISTANT",
+                "createTime": "2026-05-24T10:05:22.532Z",
+                "parentResponseId": "37052e19-6f76-4216-8985-e0de977df456",
+                "manual": false,
+                "partial": false,
+                "shared": false,
+                "query": "",
+                "queryType": "imagine",
+                "webSearchResults": [],
+                "xpostIds": [],
+                "xposts": [],
+                "generatedImageUrls": [
+                    "users/a524d3de-92f6-4f44-aaa7-218a8ad1fa4d/generated/9ca7f9fe-cf08-456b-a9a6-8115d9a13ad2/image.jpg"
+                ],
+                "imageAttachments": [],
+                "fileAttachments": [
+                    "9ca7f9fe-cf08-456b-a9a6-8115d9a13ad2"
+                ],
+                "cardAttachmentsJson": [],
+                "fileUris": [],
+                "fileAttachmentsMetadata": [],
+                "isControl": false,
+                "steps": [],
+                "imageEditUris": [],
+                "mediaTypes": [],
+                "webpageUrls": [],
+                "metadata": {
+                    "deepsearchPreset": "",
+                    "generated_image_height": 1360,
+                    "generated_image_width": 768,
+                    "request_metadata": {
+                        "effort": "high",
+                        "mode": "imagine",
+                        "model": "imagine-image-edit"
+                    },
+                    "request_trace_id": "361f6f63ba466d04517b026e1cfa9568"
+                },
+                "generatedImageHeight": 1360,
+                "generatedImageWidth": 768,
+                "thinkingStartTime": "2026-05-24T10:05:13.606Z",
+                "thinkingEndTime": "2026-05-24T10:05:22.524Z",
+                "citedWebSearchResults": [],
+                "toolResponses": [],
+                "model": "imagine-image-edit",
+                "requestMetadata": {
+                    "model": "imagine-image-edit",
+                    "mode": "MODEL_MODE_UNKNOWN",
+                    "effort": "HIGH"
+                },
+                "ragResults": [],
+                "citedRagResults": [],
+                "searchProductResults": [],
+                "connectorSearchResults": [],
+                "collectionSearchResults": [],
+                "streamErrors": [],
+                "citedXposts": [],
+                "citedConnectorSearchResults": [],
+                "citedCollectionSearchResults": [],
+                "chunks": []
+            },
+            "isThinking": false,
+            "isSoftStop": false,
+            "responseId": "4293afac-bb4d-4aa1-af8e-706991de54d9"
+        }
+    }
+}{
+    "result": {
+        "title": {
+            "newTitle": "Big Cat Image Edited"
+        }
+    }
+}
