@@ -201,18 +201,26 @@ def _save_image(raw: bytes, mime: str, file_id: str) -> str:
 
 
 async def _download_image_bytes(token: str, url: str) -> tuple[bytes, str]:
-    try:
-        stream, content_type = await download_asset(token, url)
-        chunks: list[bytes] = []
-        async for chunk in stream:
-            chunks.append(chunk)
-        return b"".join(chunks), (content_type or infer_content_type(url) or "image/jpeg")
-    except UpstreamError:
-        pass
-    except Exception as exc:
-        raise UpstreamError(f"Image download failed: {exc}") from exc
+    # Retry up to 4 times with increasing delay — CDN may need time to commit the image
+    delays = [0, 3, 6, 10]
+    last_exc: Exception | None = None
+    for i, delay in enumerate(delays):
+        if delay > 0:
+            logger.debug("image download retry {}/{}: waiting {}s before retry: url={}", i, len(delays)-1, delay, url)
+            await asyncio.sleep(delay)
+        try:
+            stream, content_type = await download_asset(token, url)
+            chunks: list[bytes] = []
+            async for chunk in stream:
+                chunks.append(chunk)
+            return b"".join(chunks), (content_type or infer_content_type(url) or "image/jpeg")
+        except UpstreamError as exc:
+            last_exc = exc
+            logger.debug("image download attempt {} failed (with auth): url={} error={}", i+1, url, exc)
+        except Exception as exc:
+            raise UpstreamError(f"Image download failed: {exc}") from exc
 
-    # Retry without auth — assets.grok.com may serve some images as public CDN
+    # Final fallback: try without auth cookie — assets.grok.com may be public CDN
     try:
         import aiohttp
         async with aiohttp.ClientSession() as session:
@@ -221,6 +229,7 @@ async def _download_image_bytes(token: str, url: str) -> tuple[bytes, str]:
                     data = await resp.read()
                     ct = resp.content_type or infer_content_type(url) or "image/jpeg"
                     return data, ct
+                logger.debug("image download without-auth also failed: url={} status={}", url, resp.status)
                 raise UpstreamError(f"Image download failed (no-auth): status={resp.status}")
     except UpstreamError:
         raise
@@ -781,6 +790,11 @@ def _collect_edit_results(
         except (TypeError, ValueError):
             progress = 0
         if progress >= 100 and not stream.get("moderated"):
+            logger.info("image edit stream final: keys={} imageUrl={} assetId={}",
+                list(stream.keys()),
+                stream.get("imageUrl"),
+                stream.get("assetId"),
+            )
             raw_url = stream.get("imageUrl")
             asset_id = stream.get("assetId")
             resolved_url = _resolve_edit_final_url(
@@ -795,10 +809,12 @@ def _collect_edit_results(
 
     for index, asset_id in enumerate(extract_model_response_file_attachments(obj)):
         resolved_url = _resolve_edit_final_url(raw_url=None, asset_id=asset_id, user_id=user_id)
+        logger.info("image edit attachment fallback: index={} asset_id={} resolved={}", index, asset_id, resolved_url)
         if resolved_url:
             final_urls.setdefault(index, resolved_url)
 
     for index, url in enumerate(extract_model_response_urls(obj)):
+        logger.info("image edit generatedImageUrls fallback: index={} url={}", index, url)
         final_urls.setdefault(index, _absolutize_asset_url(url))
 
 
