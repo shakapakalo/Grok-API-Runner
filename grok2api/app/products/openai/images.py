@@ -206,11 +206,26 @@ async def _download_image_bytes(token: str, url: str) -> tuple[bytes, str]:
         chunks: list[bytes] = []
         async for chunk in stream:
             chunks.append(chunk)
+        return b"".join(chunks), (content_type or infer_content_type(url) or "image/jpeg")
+    except UpstreamError:
+        pass
+    except Exception as exc:
+        raise UpstreamError(f"Image download failed: {exc}") from exc
+
+    # Retry without auth — assets.grok.com may serve some images as public CDN
+    try:
+        import aiohttp
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=60)) as resp:
+                if resp.status == 200:
+                    data = await resp.read()
+                    ct = resp.content_type or infer_content_type(url) or "image/jpeg"
+                    return data, ct
+                raise UpstreamError(f"Image download failed (no-auth): status={resp.status}")
     except UpstreamError:
         raise
     except Exception as exc:
-        raise UpstreamError(f"Image download failed: {exc}") from exc
-    return b"".join(chunks), (content_type or infer_content_type(url) or "image/jpeg")
+        raise UpstreamError(f"Image download failed (no-auth): {exc}") from exc
 
 
 async def _resolve_image_output(
