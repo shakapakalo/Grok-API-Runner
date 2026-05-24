@@ -287,10 +287,14 @@ class DownloadService:
                 else:
                     raw_bytes = response.content
 
-                # Remove watermark for images
+                # Remove watermark
                 if media_type == "image":
                     raw_bytes = await asyncio.to_thread(
                         _remove_grok_watermark, raw_bytes, mime
+                    )
+                elif media_type == "video":
+                    raw_bytes = await asyncio.to_thread(
+                        _remove_grok_watermark_video, raw_bytes
                     )
 
                 tmp_path = cache_path.with_suffix(cache_path.suffix + ".tmp")
