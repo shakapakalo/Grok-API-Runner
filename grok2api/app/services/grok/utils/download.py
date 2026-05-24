@@ -7,6 +7,7 @@ Download service for assets.grok.com.
 import asyncio
 import base64
 import hashlib
+import io
 import os
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -21,6 +22,37 @@ from app.core.exceptions import AppException
 from app.services.reverse.assets_download import AssetsDownloadReverse
 from app.services.reverse.utils.session import ResettableSession
 from app.services.grok.utils.locks import _get_download_semaphore, _file_lock
+
+
+def _remove_grok_watermark(raw: bytes, mime: str) -> bytes:
+    """Remove the Grok logo watermark from the bottom-right corner of the image."""
+    try:
+        from PIL import Image
+
+        img = Image.open(io.BytesIO(raw)).convert("RGB")
+        width, height = img.size
+
+        wm_w = max(130, int(width * 0.13))
+        wm_h = max(38,  int(height * 0.04))
+        wm_left = width  - wm_w
+        wm_top  = height - wm_h
+
+        sample_top    = max(0, wm_top - wm_h)
+        sample_region = img.crop((wm_left, sample_top, width, wm_top))
+        fill = sample_region.resize((wm_w, wm_h), Image.LANCZOS)
+        fill = fill.transpose(Image.FLIP_TOP_BOTTOM)
+        img.paste(fill, (wm_left, wm_top))
+
+        out = io.BytesIO()
+        fmt = "JPEG" if ("jpeg" in mime or "jpg" in mime) else "PNG"
+        save_kwargs: dict = {"format": fmt}
+        if fmt == "JPEG":
+            save_kwargs["quality"] = 95
+        img.save(out, **save_kwargs)
+        return out.getvalue()
+    except Exception as exc:
+        logger.warning("watermark removal failed, returning original: {}", exc)
+        return raw
 
 
 class DownloadService:
@@ -203,15 +235,30 @@ class DownloadService:
                 session = await self.create()
                 response = await AssetsDownloadReverse.request(session, token, file_path)
 
+                mime = response.headers.get(
+                    "content-type", "application/octet-stream"
+                ).split(";")[0]
+
+                # Collect raw bytes
+                if hasattr(response, "aiter_content"):
+                    data = bytearray()
+                    async for chunk in response.aiter_content():
+                        if chunk:
+                            data.extend(chunk)
+                    raw_bytes = bytes(data)
+                else:
+                    raw_bytes = response.content
+
+                # Remove watermark for images
+                if media_type == "image":
+                    raw_bytes = await asyncio.to_thread(
+                        _remove_grok_watermark, raw_bytes, mime
+                    )
+
                 tmp_path = cache_path.with_suffix(cache_path.suffix + ".tmp")
                 try:
                     async with aiofiles.open(tmp_path, "wb") as f:
-                        if hasattr(response, "aiter_content"):
-                            async for chunk in response.aiter_content():
-                                if chunk:
-                                    await f.write(chunk)
-                        else:
-                            await f.write(response.content)
+                        await f.write(raw_bytes)
                     os.replace(tmp_path, cache_path)
                 finally:
                     if tmp_path.exists() and not cache_path.exists():
@@ -220,9 +267,6 @@ class DownloadService:
                         except Exception:
                             pass
 
-                mime = response.headers.get(
-                    "content-type", "application/octet-stream"
-                ).split(";")[0]
                 logger.info(f"Downloaded: {file_path}")
 
                 asyncio.create_task(self._check_limit())
