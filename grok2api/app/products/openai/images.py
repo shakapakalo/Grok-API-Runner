@@ -196,6 +196,43 @@ def _is_imagine_public_url(url: str) -> bool:
     return host.startswith("imagine-public")
 
 
+def _remove_grok_watermark(raw: bytes, mime: str) -> bytes:
+    """Remove the Grok logo watermark from the bottom-right corner of the image."""
+    try:
+        from PIL import Image
+        import io
+
+        img = Image.open(io.BytesIO(raw)).convert("RGB")
+        width, height = img.size
+
+        # Grok watermark sits in the bottom-right corner.
+        # Empirically: ~130px wide, ~38px tall on a 1024x1024 image (≈13% w, 4% h).
+        wm_w = max(130, int(width * 0.13))
+        wm_h = max(38,  int(height * 0.04))
+
+        wm_left = width  - wm_w
+        wm_top  = height - wm_h
+
+        # Sample the region just above the watermark to use as fill.
+        sample_top    = max(0, wm_top - wm_h)
+        sample_region = img.crop((wm_left, sample_top, width, wm_top))
+        fill = sample_region.resize((wm_w, wm_h), Image.LANCZOS)
+        fill = fill.transpose(Image.FLIP_TOP_BOTTOM)
+
+        img.paste(fill, (wm_left, wm_top))
+
+        out = io.BytesIO()
+        fmt = "JPEG" if ("jpeg" in mime or "jpg" in mime) else "PNG"
+        save_kwargs: dict = {"format": fmt}
+        if fmt == "JPEG":
+            save_kwargs["quality"] = 95
+        img.save(out, **save_kwargs)
+        return out.getvalue()
+    except Exception as exc:
+        logger.warning("watermark removal failed, returning original image: {}", exc)
+        return raw
+
+
 def _save_image(raw: bytes, mime: str, file_id: str) -> str:
     return save_local_image(raw, mime, file_id)
 
@@ -267,6 +304,8 @@ async def _resolve_image_output(
         except UpstreamError:
             logger.warning("image download failed, falling back to grok url: url={}", url)
             return _ImageOutput(api_value=url, markdown_value=f"![image]({url})")
+
+    raw = await asyncio.to_thread(_remove_grok_watermark, raw, mime)
 
     if fmt == "b64_json":
         b64 = blob_b64 or base64.b64encode(raw).decode()
