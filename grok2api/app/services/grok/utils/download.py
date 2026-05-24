@@ -59,22 +59,16 @@ def _remove_grok_watermark_video(raw: bytes) -> bytes:
         if not w or not h:
             return raw
 
-        wm_w = max(130, int(w * 0.13))
-        wm_h = max(38,  int(h * 0.06))
-        x = w - wm_w
-        y = h - wm_h
-
-        # Fill watermark zone with pixels from just above it (same as image approach)
-        above_y = max(0, y - wm_h)
-        vf = (
-            f"[0:v]split=2[base][ref];"
-            f"[ref]crop={wm_w}:{wm_h}:{x}:{above_y}[fill];"
-            f"[base][fill]overlay={x}:{y}"
-        )
+        # Original delogo logic: x=W-155, y=H-50, w=155, h=50
+        # ffmpeg 6.x doesn't support W/H vars — pass computed integers directly.
+        # delogo also fails when the region touches the exact frame boundary,
+        # so keep it 4px inset from the right/bottom edges.
+        x = max(0, w - 159)
+        y = max(0, h - 54)
         result = subprocess.run(
             [
                 "ffmpeg", "-y", "-i", tmp_in_path,
-                "-filter_complex", vf,
+                "-vf", f"delogo=x={x}:y={y}:w=155:h=50:show=0",
                 "-c:v", "libx264", "-crf", "18", "-preset", "fast",
                 "-c:a", "copy",
                 tmp_out_path,
