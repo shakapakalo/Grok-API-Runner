@@ -238,7 +238,11 @@ async def _resolve_image_output(
         except (ValueError, TypeError, binascii.Error) as exc:
             raise UpstreamError(f"Invalid upstream image blob: {exc}") from exc
     else:
-        raw, mime = await _download_image_bytes(token, url)
+        try:
+            raw, mime = await _download_image_bytes(token, url)
+        except UpstreamError:
+            logger.warning("image download failed, falling back to grok url: url={}", url)
+            return _ImageOutput(api_value=url, markdown_value=f"![image]({url})")
 
     if fmt == "b64_json":
         b64 = blob_b64 or base64.b64encode(raw).decode()
