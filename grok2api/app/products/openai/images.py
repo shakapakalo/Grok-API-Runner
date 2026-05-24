@@ -766,13 +766,13 @@ def _resolve_edit_final_url(
     asset_id: str | None,
     user_id: str | None,
 ) -> str | None:
-    """Prefer stable asset content URLs over generated image paths for image-edit finals."""
+    """Prefer imageUrl from stream (has correct /generated/ path) over assetId-constructed URL."""
+    if raw_url:
+        return _absolutize_asset_url(raw_url)
     if asset_id and user_id:
         resolved = resolve_asset_reference(asset_id, "", user_id=user_id)
         if resolved:
             return resolved
-    if raw_url:
-        return _absolutize_asset_url(raw_url)
     return None
 
 
